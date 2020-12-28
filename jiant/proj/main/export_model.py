@@ -65,7 +65,7 @@ def export_model(
         if(layer_idx!=layer):
             for param in list(model.bert.encoder.layer[layer_idx].parameters()):
                 param.requires_grad = False
-    print(f"frezezed all layers except {layer}")
+    print(f"froze all layers except {layer}")
 
     torch.save(model.state_dict(), model_path)
     py_io.write_json(model.config.to_dict(), model_config_path)
