@@ -85,7 +85,7 @@ def get_model_and_tokenizer_classes(
 ) -> Tuple[Type[transformers.PreTrainedModel], Type[transformers.PreTrainedTokenizer]]:
     # We want the chosen model to have all the weights from pretraining (if possible)
     class_lookup = {
-        "bert": (transformers.BertForPreTraining, transformers.BertTokenizer),
+        "bert": (transformers.BertForPreTraining, transformers.BertTokenizerFast),
         "xlm-clm-": (transformers.XLMWithLMHeadModel, transformers.XLMTokenizer),
         "roberta": (transformers.RobertaForMaskedLM, transformers.RobertaTokenizer),
         "albert": (transformers.AlbertForMaskedLM, transformers.AlbertTokenizer),
