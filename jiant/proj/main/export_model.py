@@ -15,7 +15,7 @@ class RunConfiguration(zconf.RunConfig):
     hf_model_name = zconf.attr(type=str, default=None)
 
 
-def lookup_and_export_model(model_type: str, output_base_path: str, hf_model_name: str = None):
+def lookup_and_export_model(model_type: str, output_base_path: str, layer: int, hf_model_name: str = None):
     model_class, tokenizer_class = get_model_and_tokenizer_classes(model_type)
     export_model(
         model_type=model_type,
@@ -23,12 +23,14 @@ def lookup_and_export_model(model_type: str, output_base_path: str, hf_model_nam
         model_class=model_class,
         tokenizer_class=tokenizer_class,
         hf_model_name=hf_model_name,
+        layer=layer,
     )
 
 
 def export_model(
     model_type: str,
     output_base_path: str,
+    layer: int,
     model_class: Type[transformers.PreTrainedModel],
     tokenizer_class: Type[transformers.PreTrainedTokenizer],
     hf_model_name: str = None,
@@ -58,6 +60,13 @@ def export_model(
     model_path = os.path.join(model_fol_path, f"{model_type}.p")
     model_config_path = os.path.join(model_fol_path, f"{model_type}.json")
     model = model_class.from_pretrained(hf_model_name)
+    
+    for layer_idx in range(12):
+        if(layer_idx!=layer):
+            for param in list(model.bert.encoder.layer[layer_idx].parameters()):
+                param.requires_grad = False
+    print(f"frezezed all layers except {layer}")
+
     torch.save(model.state_dict(), model_path)
     py_io.write_json(model.config.to_dict(), model_config_path)
     tokenizer = tokenizer_class.from_pretrained(hf_model_name)
@@ -100,6 +109,7 @@ def main():
         model_type=args.model_type,
         output_base_path=args.output_base_path,
         hf_model_name=args.hf_model_name,
+        layer=args.layer,
     )
 
 
